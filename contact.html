@@ -182,97 +182,94 @@
                             <h1 class="display-3 text-capitalize mb-3">Uw vraag</h1>
                             <p class="mb-0">Neem contact op voor afspraken, vragen of opmerkingen. Ik zal u zo snel mogelijk contacteren.</p>
                         </div>
-                        <form>
+                        <form id="contactForm" onsubmit="submitForm(event)">
+                            <!-- REQUIRED: Your Access Key -->
+                            <input type="hidden" name="access_key" value="37856d7a-f04b-4961-b69e-7c6c711fc27c">
+                            
+                            <!-- Optional: Custom Subject for Email -->
+                            <input type="hidden" name="subject" value="Nieuw Bericht van Website">
+                            
+                            <!-- Optional: Sender Name -->
+                            <input type="hidden" name="from_name" value="Uw Website Naam">
+                            
                             <div class="row g-4">
+                                <!-- Naam -->
                                 <div class="col-lg-12 col-xl-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control border-2" id="name" placeholder="Uw Naam" required>
+                                        <input type="text" class="form-control border-2" id="name" name="name" placeholder="Uw Naam" required>
                                         <label for="name">Uw Naam</label>
                                     </div>
                                 </div>
+                                
+                                <!-- E-mail -->
                                 <div class="col-lg-12 col-xl-6">
                                     <div class="form-floating">
-                                        <input type="email" class="form-control border-2" id="email" placeholder="Uw E-mail" required>
+                                        <input type="email" class="form-control border-2" id="email" name="email" placeholder="Uw E-mail" required>
                                         <label for="email">Uw E-mail</label>
                                     </div>
                                 </div>
+                                
+                                <!-- Telefoonnummer -->
                                 <div class="col-lg-12 col-xl-6">
                                     <div class="form-floating">
-                                        <input type="tel" class="form-control border-2" id="phone" placeholder="Telefoon" required>
+                                        <input type="tel" class="form-control border-2" id="phone" name="phone" placeholder="Telefoon" required>
                                         <label for="phone">Uw Telefoon</label>
                                     </div>
                                 </div>
+                                
+                                <!-- Onderwerp -->
                                 <div class="col-lg-12 col-xl-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control border-2" id="subject" placeholder="Onderwerp" required>
+                                        <input type="text" class="form-control border-2" id="subject" name="subject" placeholder="Onderwerp" required>
                                         <label for="subject">Onderwerp</label>
                                     </div>
                                 </div>
+                                
+                                <!-- Bericht -->
                                 <div class="col-12">
                                     <div class="form-floating">
-                                        <textarea class="form-control border-2" placeholder="Laat hier een bericht achter" id="message" style="height: 175px" required></textarea>
+                                        <textarea class="form-control border-2" placeholder="Laat hier een bericht achter" id="message" name="message" style="height: 175px" required></textarea>
                                         <label for="message">Bericht</label>
                                     </div>
                                 </div>
+                                
+                                <!-- Verzenden knop -->
                                 <div class="col-12">
-                                    <button class="btn btn-primary w-100 py-3">Verstuur Bericht</button>
+                                    <button class="btn btn-primary w-100 py-3" type="submit">Verstuur Bericht</button>
                                 </div>
                             </div>
-                            <div id="notification" class="mt-3"></div> <!-- Meldingen sectie -->
+                            
+                            <div id="notification" class="mt-3"></div>
                         </form>
                         
                         <script>
-                            let lastSendTime = 0;
-                            const sendCooldown = 30000; // 5 seconden cooldown
+                        function submitForm(event) {
+                            event.preventDefault(); // Voorkom de standaard formulierverzending
                         
-                            document.querySelector('form').addEventListener('submit', function(event) {
-                                event.preventDefault(); // Voorkom dat het formulier standaard wordt verzonden
+                            const form = document.getElementById('contactForm');
+                            const formData = new FormData(form);
                         
-                                const currentTime = Date.now();
-                                if (currentTime - lastSendTime < sendCooldown) {
-                                    document.getElementById('notification').innerText = "Je moet even wachten voordat je opnieuw een bericht kunt versturen.";
-                                    return;
-                                }
-                        
-                                const name = document.getElementById('name').value;
-                                const email = document.getElementById('email').value;
-                                const phone = document.getElementById('phone').value;
-                                const subject = document.getElementById('subject').value;
-                                const message = document.getElementById('message').value;
-                        
-                                // Controleer of de velden niet leeg zijn
-                                if (!name || !email || !phone || !subject || !message) {
-                                    document.getElementById('notification').innerText = "Vul alstublieft alle velden in.";
-                                    return;
-                                }
-                        
-                                lastSendTime = currentTime;
-                        
-                                const payload = {
-                                    content: `Nieuw bericht van ${name}:\nEmail: ${email}\nTelefoon: ${phone}\nOnderwerp: ${subject}\nBericht: ${message}`
-                                };
-                        
-                                fetch('https://discord.com/api/webhooks/1313579581621407745/rbyeA3dRjm7SxpVqvsGoToqHfOmxtZSxbE4ko9r9UktbCNFzIwYjaTWtMz0-NhiBeQZU', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify(payload)
-                                })
-                                .then(response => {
-                                    if (response.ok) {
-                                        document.getElementById('notification').innerText = "Bericht succesvol verzonden!";
-                                        document.querySelector('form').reset(); // Reset het formulier
-                                    } else {
-                                        document.getElementById('notification').innerText = "Er is een fout opgetreden bij het verzenden van je bericht.";
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    document.getElementById('notification').innerText = "Er is een fout opgetreden bij het verzenden van je bericht.";
-                                });
+                            fetch('https://api.web3forms.com/submit', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Hier kun je een melding tonen of iets anders doen
+                                console.log(data);
+                                // Redirect naar index.html na succesvolle verzending
+                                window.location.href = 'index.html';
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                // Hier kun je een foutmelding tonen
                             });
+                        }
                         </script>
+                        
+                        <!-- Vereiste script voor hCaptcha -->
+                        <script src="https://web3forms.com/client/script.js" async defer></script>
+                        
                     </div>
                     <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.4s">
                         <div class="row g-4">
@@ -280,7 +277,7 @@
                                 <div class="d-inline-flex rounded bg-white w-100 p-4">
                                     <i class="fas fa-map-marker-alt fa-2x text-secondary me-4"></i>
                                     <div>
-                                        <h4>Address</h4>
+                                        <h4>Adres</h4>
                                         <p class="mb-0"> <a href="contact.html">De Pruikenmaker 22 5506CT Veldhoven</a></p>
                                     </div>
                                 </div>
